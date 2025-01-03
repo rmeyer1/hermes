@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Main Background Colors */
+  --bg-primary: #1a1e2d;    /* Dark blue-gray background */
+  --bg-secondary: #242937;   /* Slightly lighter blue-gray for cards */
+  --bg-sidebar: #1e54ff;     /* Bright blue for sidebar */
+
+  /* Text Colors */
+  --text-primary: #ffffff;   /* White text */
+  --text-secondary: #8f9bba; /* Muted blue-gray text */
+  --text-accent: #3699ff;    /* Bright blue for links/accents */
+
+  /* Border Colors */
+  --border-color: #2d3344;   /* Subtle border color */
+
+  /* Button Colors */
+  --button-primary: #1e54ff; /* Bright blue buttons */
+  --button-hover: #1848db;   /* Darker blue for hover states */
+}
+
+/* Apply default dark theme */
+body {
+  @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
+}
+
+/* Card styling */
+.card {
+  @apply bg-[var(--bg-secondary)] rounded-lg shadow-lg p-6;
+}
+
+/* Sidebar styling */
+.sidebar {
+  @apply bg-[var(--bg-sidebar)] text-white;
+}
+
+/* Button styling */
+.btn-primary {
+  @apply bg-[var(--button-primary)] hover:bg-[var(--button-hover)] text-white px-4 py-2 rounded-lg transition-colors;
+}
+
+/* Table styling */
+.table-dark {
+  @apply bg-[var(--bg-secondary)] rounded-lg overflow-hidden;
+}
+
+.table-dark th {
+  @apply bg-[var(--bg-primary)] text-[var(--text-secondary)] px-6 py-3 text-left;
+}
+
+.table-dark td {
+  @apply px-6 py-4 border-t border-[var(--border-color)];
+}
+
+/* Chart colors */
+.chart-line {
+  stroke: var(--text-accent);
+}
+
+.chart-area {
+  fill: rgba(54, 153, 255, 0.1);
+}
