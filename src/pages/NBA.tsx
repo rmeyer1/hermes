@@ -3,10 +3,10 @@ import GameCard from '@components/GameCard'
 import { oddsService } from '@services/oddsService'
 
 type MarketType = 'h2h' | 'spreads' | 'totals'
+type OddsData = any[]
 
-
-const NFL: React.FC = () => {
-  const [games, setGames] = useState<any[]>([])
+const NBA: React.FC = () => {
+  const [games, setGames] = useState<OddsData>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('spreads')
@@ -16,8 +16,7 @@ const NFL: React.FC = () => {
       try {
         setLoading(true)
         const data = await oddsService.getLatestOdds('basketball_nba')
-        console.log('Loaded games:', data)
-        setGames(data)
+        setGames(data.data || [])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
@@ -62,4 +61,4 @@ const NFL: React.FC = () => {
   )
 }
 
-export default NFL 
+export default NBA 
