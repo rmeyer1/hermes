@@ -2,74 +2,13 @@ import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import axios from 'axios';
 
-const SPORTS = {
-  NFL: 'americanfootball_nfl',
-  NCAAF: 'americanfootball_ncaaf',
-  NBA: 'basketball_nba',
-  NCAAB: 'basketball_ncaab',
-  NHL: 'icehockey_nhl'
-};
-
+// Format private key by replacing literal \n with actual newlines
 const formatPrivateKey = (key) => {
   if (!key) throw new Error('Private key is undefined');
+  // Remove any quotes from the beginning and end
   const unquoted = key.replace(/^["']|["']$/g, '');
   return unquoted.replace(/\\n/g, '\n');
 };
-
-const API_KEYS = {
-  primary: process.env.VITE_ODDS_API_KEY,
-  secondary: process.env.VITE_ODDS_API_KEY_2
-};
-
-async function makeApiRequest(apiKey, sport) {
-  const response = await axios.get(`https://api.the-odds-api.com/v4/sports/${sport}/odds/`, {
-    params: {
-      apiKey,
-      regions: 'us,us2',
-      markets: 'h2h,spreads,totals',
-      oddsFormat: 'american',
-      includeLinks: true
-    }
-  });
-
-  const remainingRequests = parseInt(response.headers['x-requests-remaining'], 10);
-  const usedRequests = parseInt(response.headers['x-requests-used'], 10);
-  
-  return {
-    data: response.data,
-    remainingRequests,
-    usedRequests,
-    sport
-  };
-}
-
-async function fetchSportOdds(db, currentKey, sport) {
-  try {
-    const result = await makeApiRequest(currentKey, sport);
-    console.log(`${sport} - API Requests Remaining: ${result.remainingRequests}`);
-
-    await db.collection('odds').add({
-      data: result.data,
-      sport: sport,
-      timestamp: new Date(),
-      apiRequestsRemaining: result.remainingRequests,
-      apiRequestsUsed: result.usedRequests,
-      apiKeyUsed: currentKey === API_KEYS.primary ? 'primary' : 'secondary'
-    });
-
-    return {
-      success: true,
-      remainingRequests: result.remainingRequests,
-      currentKey
-    };
-  } catch (error) {
-    console.error(`Error fetching ${sport}:`, error);
-    return {
-      success: false,
-      error
-    };
-  }
-}
 
 try {
   console.log('Initializing Firebase config...');
@@ -87,42 +26,58 @@ try {
     client_x509_cert_url: process.env.VITE_FIREBASE_CERT_URL
   };
 
+  console.log('Config created, initializing Firebase...');
+  console.log('Project ID:', firebaseConfig.project_id);
+  console.log('Client Email:', firebaseConfig.client_email);
+  console.log('Private Key format check:', 
+    firebaseConfig.private_key.startsWith('-----BEGIN PRIVATE KEY-----') && 
+    firebaseConfig.private_key.endsWith('-----END PRIVATE KEY-----\n')
+  );
+
+  // Initialize Firebase Admin
   initializeApp({
     credential: cert(firebaseConfig)
   });
 
-  console.log('Firebase initialized');
+  console.log('Firebase initialized, getting Firestore...');
   const db = getFirestore();
 
-  async function fetchAllOdds() {
+  async function fetchOdds() {
+    const sports = [
+        'americanfootball_nfl',
+        'americanfootball_ncaaf',
+        'basketball_nba',
+        'basketball_ncaab',
+        'icehockey_nhl'
+      ];
     try {
-      let currentKey = API_KEYS.primary;
-      
-      for (const [sportName, sportCode] of Object.entries(SPORTS)) {
-        console.log(`Fetching ${sportName} odds...`);
-        
-        const result = await fetchSportOdds(db, currentKey, sportCode);
-        
-        if (!result.success && currentKey === API_KEYS.primary) {
-          console.log(`Switching to secondary key for ${sportName}`);
-          currentKey = API_KEYS.secondary;
-          await fetchSportOdds(db, currentKey, sportCode);
-        }
-        
-        if (result.success && result.remainingRequests === 0 && currentKey === API_KEYS.primary) {
-          console.log('Primary API key depleted, switching to secondary key');
-          currentKey = API_KEYS.secondary;
-        }
+      console.log('Fetching odds data...');
+      for (const sport of sports) { 
+        console.log(`Fetching odds for ${sport}...`);
+        const response = await axios.get(`https://api.the-odds-api.com/v4/sports/${sport}/odds/`, {
+            params: {
+              apiKey: process.env.VITE_ODDS_API_KEY,
+            regions: 'us,us2',
+            markets: 'h2h,spreads,totals',
+            oddsFormat: 'american',
+            includeLinks: true
+          }
+        });
+        console.log('Odds data fetched, saving to Firestore...');
+        await db.collection('odds').add({
+          data: response.data,
+          timestamp: new Date()
+        });
       }
 
-      console.log('Successfully fetched all odds data');
+      console.log('Successfully fetched and saved odds data');
     } catch (error) {
-      console.error('Error in fetchAllOdds:', error);
+      console.error('Error in fetchOdds:', error);
       process.exit(1);
     }
   }
 
-  fetchAllOdds();
+  fetchOdds();
 } catch (error) {
   console.error('Error in setup:', error);
   process.exit(1);
