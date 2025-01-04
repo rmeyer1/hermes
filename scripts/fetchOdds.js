@@ -10,6 +10,36 @@ const formatPrivateKey = (key) => {
   return unquoted.replace(/\\n/g, '\n');
 };
 
+let currentApiKey = process.env.VITE_ODDS_API_KEY;
+const MIN_REQUESTS_THRESHOLD = 5; // Buffer to switch before hitting 0
+
+async function checkAndRotateApiKey() {
+    try {
+      console.log('Checking API key...');
+      const checkResponse = await axios.get('https://api.the-odds-api.com/v4/sports', {
+        params: { apiKey: currentApiKey }
+      });
+            
+      const remainingRequests = checkResponse.headers['x-requests-remaining'];
+      console.log(`Remaining requests: ${remainingRequests}`);
+      
+      if (parseInt(remainingRequests) <= MIN_REQUESTS_THRESHOLD) {
+        if (currentApiKey === process.env.VITE_ODDS_API_KEY) {
+          console.log('Approaching request limit, switching to backup API key...');
+          currentApiKey = process.env.VITE_ODDS_API_KEY_2;
+        } else {
+          console.error('All API keys near limit. Consider increasing threshold or adding more keys.');
+        }
+      }
+    } catch (error) {
+      // If first key fails, try the backup
+      if (currentApiKey === process.env.VITE_ODDS_API_KEY) {
+        console.log('Primary key failed, switching to backup API key...');
+        currentApiKey = process.env.VITE_ODDS_API_KEY_2;
+      }
+    }
+  }
+
 try {
   console.log('Initializing Firebase config...');
   
@@ -51,6 +81,8 @@ try {
         'icehockey_nhl'
       ];
     try {
+     console.log('Checking API key...');
+      await checkAndRotateApiKey(checkResponse.headers['x-requests-remaining']);
       console.log('Fetching odds data...');
       for (const sport of sports) { 
         console.log(`Fetching odds for ${sport}...`);
