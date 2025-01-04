@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 }
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  align-items: start;
+  isolation: isolate;
+}
+
+.games-grid > * {
+  isolation: isolate;
+  contain: content;
+}

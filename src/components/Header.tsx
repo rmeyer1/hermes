@@ -14,7 +14,6 @@ const Header: React.FC = () => {
               className="h-8 w-8 rounded"
             />
             <span className="ml-2 text-xl font-semibold text-[var(--text-primary)]">
-              Hermes
             </span>
           </Link>
           
@@ -25,6 +24,24 @@ const Header: React.FC = () => {
               className="text-[var(--text-primary)] hover:text-[var(--text-accent)] transition-colors"
             >
               NFL
+            </Link>
+            <Link 
+              to="/ncaafb" 
+              className="text-[var(--text-primary)] hover:text-[var(--text-accent)] transition-colors"
+            >
+              NCAAFB
+            </Link>
+            <Link 
+              to="/nba" 
+              className="text-[var(--text-primary)] hover:text-[var(--text-accent)] transition-colors"
+            >
+              NBA
+            </Link>
+            <Link 
+              to="/nhl" 
+              className="text-[var(--text-primary)] hover:text-[var(--text-accent)] transition-colors"
+            >
+              NHL
             </Link>
             <Link 
               to="/about" 

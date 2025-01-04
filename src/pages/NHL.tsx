@@ -15,7 +15,7 @@ const NFL: React.FC = () => {
     const loadGames = async () => {
       try {
         setLoading(true)
-        const data = await oddsService.getLatestOdds('americanfootball_nfl')
+        const data = await oddsService.getLatestOdds('icehockey_nhl')
         console.log('Loaded games:', data)
         setGames(data)
       } catch (err) {
@@ -36,7 +36,7 @@ const NFL: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-          NFL Games
+          NHL Games
         </h1>
         <select
           value={selectedMarket}
