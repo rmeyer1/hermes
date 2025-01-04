@@ -81,7 +81,6 @@ try {
         'icehockey_nhl'
       ];
     try {
-     console.log('Checking API key...');
       await checkAndRotateApiKey();
       console.log('Fetching odds data...');
       for (const sport of sports) { 
