@@ -1,0 +1,74 @@
+name: Fetch Odds Data
+
+on:
+  schedule:
+    # Run every hour from 6am to 11:59pm EST
+    - cron: '0 10-3 * * *'  # UTC times (EST+4)
+  # Optional: Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  fetch-odds:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install Dependencies
+        run: npm install
+        
+      - name: Create Service Account Key File
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account.json
+        
+      - name: Create Fetch Script
+        run: |
+          cat > fetch-odds.js << 'EOL'
+          import { initializeApp, cert } from 'firebase-admin/app';
+          import { getFirestore } from 'firebase-admin/firestore';
+          import axios from 'axios';
+          
+          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          
+          initializeApp({
+            credential: cert(serviceAccount)
+          });
+          
+          const db = getFirestore();
+          
+          async function fetchOdds() {
+            try {
+              const response = await axios.get('https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/', {
+                params: {
+                  apiKey: process.env.ODDS_API_KEY,
+                  regions: 'us,us2',
+                  markets: 'h2h,spreads,totals',
+                  oddsFormat: 'american',
+                  includeLinks: true
+                }
+              });
+          
+              await db.collection('odds').add({
+                data: response.data,
+                timestamp: new Date()
+              });
+          
+              console.log('Successfully fetched and saved odds data');
+            } catch (error) {
+              console.error('Error:', error);
+              process.exit(1);
+            }
+          }
+          
+          fetchOdds();
+          EOL
+          
+      - name: Fetch Odds Data
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          ODDS_API_KEY: ${{ secrets.VITE_ODDS_API_KEY }}
+        run: node fetch-odds.js 

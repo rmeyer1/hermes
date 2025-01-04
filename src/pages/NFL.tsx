@@ -1,12 +1,34 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import GameCard from '@components/GameCard'
-import sampleData from '@assets/sample.json'
+import { oddsService, OddsData } from '@services/oddsService'
 
 type MarketType = 'h2h' | 'spreads' | 'totals'
 
 const NFL: React.FC = () => {
-  const [games] = useState(sampleData)
+  const [games, setGames] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('h2h')
+
+  useEffect(() => {
+    const loadGames = async () => {
+      try {
+        setLoading(true)
+        const data = await oddsService.getLatestOdds()
+        setGames(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadGames()
+  }, [])
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
+  if (!games.length) return <div>No games available</div>
 
   return (
     <div className="container mx-auto px-4 py-8">

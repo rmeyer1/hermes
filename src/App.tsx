@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import './index.css'
 import { Routes, Route } from 'react-router-dom'
 import Layout from '@layouts/Layout'
@@ -7,6 +7,7 @@ import About from '@pages/About'
 import NFL from '@pages/NFL'
 
 function App() {
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
