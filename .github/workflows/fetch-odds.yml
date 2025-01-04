@@ -1,10 +1,10 @@
 name: Fetch Odds Data
 
-on:
-  schedule:
+schedule:
     # Run every hour from 6am to 11:59pm EST
     - cron: '0 11-23,0-4 * * *'  # UTC times (EST+4)
 
+workflow_dispatch:
 jobs:
   fetch-odds:
     runs-on: ubuntu-latest
