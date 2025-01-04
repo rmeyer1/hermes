@@ -64,16 +64,41 @@ try {
           }
         });
         console.log('Odds data fetched, saving to Firestore...');
-        await db.collection('odds').add({
-          data: response.data,
-          timestamp: new Date()
-        });
+        const timestamp = new Date();
+        
+        if (sport === 'basketball_ncaab') {
+          const data = response.data;
+          const midPoint = Math.ceil(data.length / 2);
+          
+          await Promise.all([
+            db.collection('odds').add({
+              sport,
+              data: data.slice(0, midPoint),
+              timestamp,
+              part: 1,
+              total_parts: 2
+            }),
+            db.collection('odds').add({
+              sport,
+              data: data.slice(midPoint),
+              timestamp,
+              part: 2,
+              total_parts: 2
+            })
+          ]);
+        } else {
+          await db.collection('odds').add({
+            sport,
+            data: response.data,
+            timestamp
+          });
+        }
       }
 
       console.log('Successfully fetched and saved odds data');
     } catch (error) {
       console.error('Error in fetchOdds:', error);
-      process.exit(1);
+      throw error;
     }
   }
 
