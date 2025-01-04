@@ -5,6 +5,9 @@ import Layout from '@layouts/Layout'
 import Home from '@pages/Home'
 import About from '@pages/About'
 import NFL from '@pages/NFL'
+import NBA from '@pages/NBA'
+import NCAAFB from '@pages/NCAAFB'
+import NHL from '@pages/NHL'
 
 function App() {
 
@@ -14,6 +17,9 @@ function App() {
         <Route index element={<Home />} />
         <Route path="about" element={<About />} />
         <Route path="nfl" element={<NFL />} />
+        <Route path="ncaafb" element={<NCAAFB />} />
+        <Route path="nba" element={<NBA />} />
+        <Route path="nhl" element={<NHL />} />
       </Route>
     </Routes>
   )

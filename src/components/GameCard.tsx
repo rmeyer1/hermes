@@ -36,12 +36,70 @@ interface GameCardProps {
 const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  const handleClick = () => {
+    console.log('Game ID:', game.id)
+    setIsExpanded(!isExpanded)
+  }
+
+  const renderOutcome = (outcome: Outcome) => {
+    if (marketType === 'totals') {
+      return (
+        <div className="text-[var(--text-accent)] text-right">
+          {outcome.point && `${outcome.point} `}
+          {outcome.price > 0 ? `+${outcome.price}` : outcome.price}
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-[var(--text-accent)] text-right">
+        {outcome.point !== undefined && `${outcome.point > 0 ? '+' : ''}${outcome.point} `}
+        {outcome.price > 0 ? `+${outcome.price}` : outcome.price}
+      </div>
+    )
+  }
+
+  const getMarketOutcomes = (bookmaker: Bookmaker) => {
+    const market = bookmaker.markets.find(m => m.key === marketType)
+    if (!market) return null
+
+    if (marketType === 'totals') {
+      const overOutcome = market.outcomes.find(o => o.name === 'Over')
+      const underOutcome = market.outcomes.find(o => o.name === 'Under')
+      
+      return (
+        <React.Fragment key={bookmaker.key}>
+          <div className="text-sm text-[var(--text-primary)]">
+            {bookmaker.title}
+          </div>
+          {overOutcome && renderOutcome(overOutcome)}
+          {underOutcome && renderOutcome(underOutcome)}
+        </React.Fragment>
+      )
+    }
+
+    const awayOutcome = market.outcomes.find(o => o.name === game.away_team)
+    const homeOutcome = market.outcomes.find(o => o.name === game.home_team)
+
+    return (
+      <React.Fragment key={bookmaker.key}>
+        <div className="text-sm text-[var(--text-primary)]">
+          {bookmaker.title}
+        </div>
+        {awayOutcome && renderOutcome(awayOutcome)}
+        {homeOutcome && renderOutcome(homeOutcome)}
+      </React.Fragment>
+    )
+  }
+
   return (
-    <div className="bg-[var(--bg-secondary)] rounded-lg shadow-lg overflow-hidden">
-      {/* Game Header - Now Clickable */}
+    <div 
+      className="bg-[var(--bg-secondary)] rounded-lg overflow-hidden"
+      data-game-id={game.id}
+    >
       <div 
-        className="p-4 border-b border-[var(--border-color)] cursor-pointer hover:bg-[var(--bg-hover)]"
-        onClick={() => setIsExpanded(!isExpanded)}
+        className="p-4 cursor-pointer hover:bg-[var(--bg-hover)] border-b border-[var(--border-color)]"
+        onClick={handleClick}
       >
         <div className="flex justify-between items-center">
           <div className="text-sm text-[var(--text-secondary)]">
@@ -60,41 +118,23 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
         </div>
       </div>
 
-      {/* Collapsible Bookmakers Grid */}
-      <div className={`transition-all duration-200 ease-in-out ${
-        isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-      }`}>
+      <div 
+        className="transition-all duration-300 ease-in-out overflow-hidden"
+        style={{ maxHeight: isExpanded ? '800px' : '0' }}
+      >
         <div className="p-4">
           <div className="grid grid-cols-[auto,1fr,1fr] gap-4">
             {/* Headers */}
             <div className="text-sm font-semibold text-[var(--text-secondary)]">Bookmaker</div>
-            <div className="text-sm font-semibold text-[var(--text-secondary)] text-right">{game.away_team}</div>
-            <div className="text-sm font-semibold text-[var(--text-secondary)] text-right">{game.home_team}</div>
+            <div className="text-sm font-semibold text-[var(--text-secondary)] text-right">
+              {marketType === 'totals' ? 'Over' : game.away_team}
+            </div>
+            <div className="text-sm font-semibold text-[var(--text-secondary)] text-right">
+              {marketType === 'totals' ? 'Under' : game.home_team}
+            </div>
 
             {/* Bookmaker rows */}
-            {game.bookmakers.map((bookmaker) => {
-              const market = bookmaker.markets.find(m => m.key === marketType)
-              if (!market) return null
-
-              const awayOutcome = market.outcomes.find(o => o.name === game.away_team)
-              const homeOutcome = market.outcomes.find(o => o.name === game.home_team)
-
-              return (
-                <React.Fragment key={bookmaker.key}>
-                  <div className="text-sm text-[var(--text-primary)]">
-                    {bookmaker.title}
-                  </div>
-                  <div className="text-[var(--text-accent)] text-right">
-                    {awayOutcome?.point !== undefined && `${awayOutcome.point > 0 ? '+' : ''}${awayOutcome.point} `}
-                    {awayOutcome?.price > 0 ? `+${awayOutcome.price}` : awayOutcome?.price}
-                  </div>
-                  <div className="text-[var(--text-accent)] text-right">
-                    {homeOutcome?.point !== undefined && `${homeOutcome.point > 0 ? '+' : ''}${homeOutcome.point} `}
-                    {homeOutcome?.price > 0 ? `+${homeOutcome.price}` : homeOutcome?.price}
-                  </div>
-                </React.Fragment>
-              )
-            })}
+            {game.bookmakers.map((bookmaker) => getMarketOutcomes(bookmaker))}
           </div>
         </div>
       </div>
