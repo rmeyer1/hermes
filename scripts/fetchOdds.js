@@ -82,7 +82,7 @@ try {
       ];
     try {
      console.log('Checking API key...');
-      await checkAndRotateApiKey(checkResponse.headers['x-requests-remaining']);
+      await checkAndRotateApiKey();
       console.log('Fetching odds data...');
       for (const sport of sports) { 
         console.log(`Fetching odds for ${sport}...`);
