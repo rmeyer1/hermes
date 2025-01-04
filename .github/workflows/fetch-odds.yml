@@ -23,10 +23,10 @@ jobs:
         run: npm install firebase-admin axios
         
       - name: Create Secret Files
-        shell: bash
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' | base64 --decode > service-account.json
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account.json
           echo '${{ secrets.VITE_ODDS_API_KEY }}' > odds-api-key.txt
+          cat service-account.json  # Debug: Print the content to check
           
       - name: Create Fetch Script
         run: |
@@ -36,40 +36,47 @@ jobs:
           import axios from 'axios';
           import { readFileSync } from 'fs';
           
-          const serviceAccount = JSON.parse(readFileSync('./service-account.json'));
-          const apiKey = readFileSync('./odds-api-key.txt', 'utf8').trim();
-          
-          initializeApp({
-            credential: cert(serviceAccount)
-          });
-          
-          const db = getFirestore();
-          
-          async function fetchOdds() {
-            try {
-              const response = await axios.get('https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/', {
-                params: {
-                  apiKey,
-                  regions: 'us,us2',
-                  markets: 'h2h,spreads,totals',
-                  oddsFormat: 'american',
-                  includeLinks: true
-                }
-              });
-          
-              await db.collection('odds').add({
-                data: response.data,
-                timestamp: new Date()
-              });
-          
-              console.log('Successfully fetched and saved odds data');
-            } catch (error) {
-              console.error('Error:', error);
-              process.exit(1);
+          try {
+            const serviceAccountContent = readFileSync('./service-account.json', 'utf8');
+            console.log('Service account content:', serviceAccountContent); // Debug
+            const serviceAccount = JSON.parse(serviceAccountContent);
+            const apiKey = readFileSync('./odds-api-key.txt', 'utf8').trim();
+            
+            initializeApp({
+              credential: cert(serviceAccount)
+            });
+            
+            const db = getFirestore();
+            
+            async function fetchOdds() {
+              try {
+                const response = await axios.get('https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/', {
+                  params: {
+                    apiKey,
+                    regions: 'us,us2',
+                    markets: 'h2h,spreads,totals',
+                    oddsFormat: 'american',
+                    includeLinks: true
+                  }
+                });
+            
+                await db.collection('odds').add({
+                  data: response.data,
+                  timestamp: new Date()
+                });
+            
+                console.log('Successfully fetched and saved odds data');
+              } catch (error) {
+                console.error('Error in fetchOdds:', error);
+                process.exit(1);
+              }
             }
+            
+            fetchOdds();
+          } catch (error) {
+            console.error('Error in setup:', error);
+            process.exit(1);
           }
-          
-          fetchOdds();
           EOL
           
       - name: Fetch Odds Data
