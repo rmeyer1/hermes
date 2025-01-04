@@ -21,6 +21,24 @@ jobs:
       - name: Install Dependencies
         run: npm install firebase-admin axios
         
+      - name: Debug Environment Variables
+        run: |
+          echo "PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID}"
+          echo "PRIVATE_KEY_ID exists: ${{ secrets.VITE_FIREBASE_PRIVATE_KEY_ID != '' }}"
+          echo "PRIVATE_KEY exists: ${{ secrets.VITE_FIREBASE_PRIVATE_KEY != '' }}"
+          echo "CLIENT_EMAIL: ${VITE_FIREBASE_CLIENT_EMAIL}"
+          echo "CLIENT_ID exists: ${{ secrets.VITE_FIREBASE_CLIENT_ID != '' }}"
+          echo "CERT_URL exists: ${{ secrets.VITE_FIREBASE_CERT_URL != '' }}"
+          echo "ODDS_API_KEY exists: ${{ secrets.VITE_ODDS_API_KEY != '' }}"
+        env:
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_PRIVATE_KEY_ID: ${{ secrets.VITE_FIREBASE_PRIVATE_KEY_ID }}
+          VITE_FIREBASE_PRIVATE_KEY: ${{ secrets.VITE_FIREBASE_PRIVATE_KEY }}
+          VITE_FIREBASE_CLIENT_EMAIL: ${{ secrets.VITE_FIREBASE_CLIENT_EMAIL }}
+          VITE_FIREBASE_CLIENT_ID: ${{ secrets.VITE_FIREBASE_CLIENT_ID }}
+          VITE_FIREBASE_CERT_URL: ${{ secrets.VITE_FIREBASE_CERT_URL }}
+          VITE_ODDS_API_KEY: ${{ secrets.VITE_ODDS_API_KEY }}
+        
       - name: Fetch Odds Data
         env:
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
