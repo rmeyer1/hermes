@@ -22,17 +22,21 @@ jobs:
       - name: Install Dependencies
         run: npm install firebase-admin axios
         
-      - name: Create Service Account Key File
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account.json
-        
+      - name: Create Secret Files
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account.json
+          echo '${{ secrets.VITE_ODDS_API_KEY }}' > odds-api-key.txt
+          
       - name: Create Fetch Script
         run: |
           cat > fetch-odds.mjs << 'EOL'
           import { initializeApp, cert } from 'firebase-admin/app';
           import { getFirestore } from 'firebase-admin/firestore';
           import axios from 'axios';
+          import { readFileSync } from 'fs';
           
-          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          const serviceAccount = JSON.parse(readFileSync('./service-account.json'));
+          const apiKey = readFileSync('./odds-api-key.txt', 'utf8').trim();
           
           initializeApp({
             credential: cert(serviceAccount)
@@ -44,7 +48,7 @@ jobs:
             try {
               const response = await axios.get('https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/', {
                 params: {
-                  apiKey: process.env.ODDS_API_KEY,
+                  apiKey,
                   regions: 'us,us2',
                   markets: 'h2h,spreads,totals',
                   oddsFormat: 'american',
@@ -68,7 +72,4 @@ jobs:
           EOL
           
       - name: Fetch Odds Data
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          ODDS_API_KEY: ${{ secrets.VITE_ODDS_API_KEY }}
         run: node fetch-odds.mjs 
