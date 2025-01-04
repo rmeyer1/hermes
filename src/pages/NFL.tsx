@@ -2,11 +2,20 @@ import React, { useState, useEffect } from 'react'
 import GameCard from '@components/GameCard'
 import { oddsService } from '@services/oddsService'
 
+interface Game {
+  id: string;
+  sport_key: string;
+  sport_title: string;
+  commence_time: string;
+  home_team: string;
+  away_team: string;
+  bookmakers: any[];
+}
+
 type MarketType = 'h2h' | 'spreads' | 'totals'
-type OddsData = any[]
 
 const NFL: React.FC = () => {
-  const [games, setGames] = useState<OddsData>([])
+  const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('spreads')
@@ -17,7 +26,7 @@ const NFL: React.FC = () => {
         setLoading(true)
         const data = await oddsService.getLatestOdds('americanfootball_nfl')
         console.log('Loaded games:', data)
-        setGames(data.data || [])
+        setGames(data as Game[])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
