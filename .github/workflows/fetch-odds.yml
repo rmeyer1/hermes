@@ -24,7 +24,7 @@ jobs:
         
       - name: Create Secret Files
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account.json
+          echo '${{ toJSON(secrets.FIREBASE_SERVICE_ACCOUNT) }}' > service-account.json
           echo '${{ secrets.VITE_ODDS_API_KEY }}' > odds-api-key.txt
           cat service-account.json  # Debug: Print the content to check
           
