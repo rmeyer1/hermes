@@ -88,7 +88,7 @@ try {
         console.log(`Fetching odds for ${sport}...`);
         const response = await axios.get(`https://api.the-odds-api.com/v4/sports/${sport}/odds/`, {
             params: {
-              apiKey: process.env.VITE_ODDS_API_KEY,
+            apiKey: currentApiKey,
             regions: 'us,us2',
             markets: 'h2h,spreads,totals',
             oddsFormat: 'american',
