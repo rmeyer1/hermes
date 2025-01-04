@@ -23,8 +23,9 @@ jobs:
         run: npm install firebase-admin axios
         
       - name: Create Secret Files
+        shell: bash
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account.json
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' | base64 --decode > service-account.json
           echo '${{ secrets.VITE_ODDS_API_KEY }}' > odds-api-key.txt
           
       - name: Create Fetch Script
