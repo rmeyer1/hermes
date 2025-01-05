@@ -47,10 +47,4 @@
   gap: 20px;
   padding: 20px;
   align-items: start;
-  isolation: isolate;
-}
-
-.games-grid > * {
-  isolation: isolate;
-  contain: content;
 }
