@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { format } from 'date-fns'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { cleanSportsUrl } from '@utils/formatUrl'
 
 interface Outcome {
   name: string
@@ -217,7 +218,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
 
     return outcome.link ? (
       <a 
-        href={outcome.link}
+        href={cleanSportsUrl(outcome.link)}
         target="_blank"
         rel="noopener noreferrer"
         className={className}
