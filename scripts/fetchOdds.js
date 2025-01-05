@@ -94,6 +94,7 @@ try {
             includeLinks: true
           }
         });
+        console.log(`${response.headers['x-requests-remaining']} requests remaining.`);
         console.log('Odds data fetched, saving to Firestore...');
         const timestamp = new Date();
         
@@ -125,7 +126,6 @@ try {
           });
         }
       }
-
       console.log('Successfully fetched and saved odds data');
     } catch (error) {
       console.error('Error in fetchOdds:', error);
