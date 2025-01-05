@@ -242,13 +242,13 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
       
       return (
         <React.Fragment key={bookmaker.key}>
-          <div className="text-sm text-[var(--text-primary)] px-2">
+          <div className="text-sm text-[var(--text-primary)] px-4 whitespace-nowrap truncate">
             {bookmaker.title}
           </div>
-          <div className="text-right">
+          <div className="text-right whitespace-nowrap">
             {overOutcome && renderOutcome(overOutcome, bookmaker.key)}
           </div>
-          <div className="text-right">
+          <div className="text-right whitespace-nowrap">
             {underOutcome && renderOutcome(underOutcome, bookmaker.key)}
           </div>
         </React.Fragment>
@@ -260,13 +260,13 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
 
     return (
       <React.Fragment key={bookmaker.key}>
-        <div className="text-sm text-[var(--text-primary)] px-2">
+        <div className="text-sm text-[var(--text-primary)] px-2 whitespace-nowrap truncate">
           {bookmaker.title}
         </div>
-        <div className="text-right">
+        <div className="text-right whitespace-nowrap">
           {awayOutcome && renderOutcome(awayOutcome, bookmaker.key)}
         </div>
-        <div className="text-right">
+        <div className="text-right whitespace-nowrap">
           {homeOutcome && renderOutcome(homeOutcome, bookmaker.key)}
         </div>
       </React.Fragment>
@@ -292,10 +292,10 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
             <ChevronDown className="w-5 h-5 text-[var(--text-secondary)]" />
           )}
         </div>
-        <div className="flex justify-between items-center text-lg mt-2">
-          <div className="text-[var(--text-primary)]">{game.away_team}</div>
-          <div className="text-[var(--text-primary)] mx-4">@</div>
-          <div className="text-[var(--text-primary)]">{game.home_team}</div>
+        <div className="flex justify-between items-center text-lg mt-2 min-w-[300px] overflow-x-auto">
+          <div className="text-[var(--text-primary)] whitespace-nowrap">{game.away_team}</div>
+          <div className="text-[var(--text-primary)] mx-4 whitespace-nowrap">@</div>
+          <div className="text-[var(--text-primary)] whitespace-nowrap">{game.home_team}</div>
         </div>
       </div>
 
@@ -304,16 +304,18 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
         style={{ maxHeight: isExpanded ? '800px' : '0' }}
       >
         <div className="p-4">
-          <div className="grid grid-cols-[1fr,auto,auto] gap-x-4">
-            <div className="text-sm font-semibold text-[var(--text-secondary)] px-2">Bookmaker</div>
-            <div className="text-sm font-semibold text-[var(--text-secondary)] flex justify-end">
-              {marketType === 'totals' ? 'Over' : game.away_team}
-            </div>
-            <div className="text-sm font-semibold text-[var(--text-secondary)] flex justify-end pl-4">
-              {marketType === 'totals' ? 'Under' : game.home_team}
-            </div>
+          <div className="min-w-[300px] overflow-x-auto">
+            <div className="grid grid-cols-[140px,100px,100px] gap-x-3">
+              <div className="text-sm font-semibold text-[var(--text-secondary)] px-2 whitespace-nowrap">Bookmaker</div>
+              <div className="text-sm font-semibold text-[var(--text-secondary)] text-right whitespace-nowrap">
+                {marketType === 'totals' ? 'Over' : game.away_team}
+              </div>
+              <div className="text-sm font-semibold text-[var(--text-secondary)] text-right pl-4 whitespace-nowrap truncate">
+                {marketType === 'totals' ? 'Under' : game.home_team}
+              </div>
 
-            {game.bookmakers.map((bookmaker) => getMarketOutcomes(bookmaker))}
+              {game.bookmakers.map((bookmaker) => getMarketOutcomes(bookmaker))}
+            </div>
           </div>
         </div>
       </div>
