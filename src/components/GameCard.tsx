@@ -6,6 +6,7 @@ interface Outcome {
   name: string
   price: number
   point?: number
+  link?: string
 }
 
 interface Market {
@@ -195,18 +196,40 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
       );
     }
 
-    return (
-      <div className={`inline-block px-2 py-1 rounded ${
-        isBestPrice 
-          ? 'text-green-500 bg-green-500/10' 
-          : 'text-[var(--text-accent)]'
-      }`}>
+    const content = (
+      <>
         {marketType === 'totals' || marketType === 'spreads' 
-          ? `${outcome.point && `${outcome.point > 0 ? '' : ''}${outcome.point} `}`
+          ? outcome.point && (
+              marketType === 'spreads'
+                ? `${outcome.point > 0 ? '+' : ''}${outcome.point} `
+                : `${outcome.point} `
+            )
           : ''}
         {outcome.price > 0 ? `+${outcome.price}` : outcome.price}
+      </>
+    );
+
+    const className = `inline-block px-2 py-1 rounded ${
+      isBestPrice 
+        ? 'text-green-500 bg-green-500/10' 
+        : 'text-[var(--text-accent)]'
+    } ${outcome.link ? 'cursor-pointer hover:opacity-80' : ''}`;
+
+    return outcome.link ? (
+      <a 
+        href={outcome.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {content}
+      </a>
+    ) : (
+      <div className={className}>
+        {content}
       </div>
-    )
+    );
   }
 
   const getMarketOutcomes = (bookmaker: Bookmaker) => {
@@ -222,10 +245,10 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
           <div className="text-sm text-[var(--text-primary)] px-2">
             {bookmaker.title}
           </div>
-          <div className="flex justify-end">
+          <div className="text-right">
             {overOutcome && renderOutcome(overOutcome, bookmaker.key)}
           </div>
-          <div className="flex justify-end">
+          <div className="text-right">
             {underOutcome && renderOutcome(underOutcome, bookmaker.key)}
           </div>
         </React.Fragment>
@@ -240,10 +263,10 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
         <div className="text-sm text-[var(--text-primary)] px-2">
           {bookmaker.title}
         </div>
-        <div className="flex justify-end">
+        <div className="text-right">
           {awayOutcome && renderOutcome(awayOutcome, bookmaker.key)}
         </div>
-        <div className="flex justify-end">
+        <div className="text-right">
           {homeOutcome && renderOutcome(homeOutcome, bookmaker.key)}
         </div>
       </React.Fragment>
@@ -286,7 +309,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
             <div className="text-sm font-semibold text-[var(--text-secondary)] flex justify-end">
               {marketType === 'totals' ? 'Over' : game.away_team}
             </div>
-            <div className="text-sm font-semibold text-[var(--text-secondary)] flex justify-end">
+            <div className="text-sm font-semibold text-[var(--text-secondary)] flex justify-end pl-4">
               {marketType === 'totals' ? 'Under' : game.home_team}
             </div>
 
