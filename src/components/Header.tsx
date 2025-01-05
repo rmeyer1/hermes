@@ -28,7 +28,6 @@ const Header: React.FC = () => {
             <Link to="/ncaafb" className="text-[var(--text-primary)] hover:text-[var(--text-accent)]">NCAAFB</Link>
             <Link to="/nba" className="text-[var(--text-primary)] hover:text-[var(--text-accent)]">NBA</Link>
             <Link to="/nhl" className="text-[var(--text-primary)] hover:text-[var(--text-accent)]">NHL</Link>
-            <Link to="/about" className="text-[var(--text-primary)] hover:text-[var(--text-accent)]">About</Link>
           </div>
         </div>
 
@@ -63,13 +62,6 @@ const Header: React.FC = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 NHL
-              </Link>
-              <Link 
-                to="/about" 
-                className="text-[var(--text-primary)] hover:text-[var(--text-accent)]"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
               </Link>
             </div>
           </div>

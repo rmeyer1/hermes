@@ -292,10 +292,16 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
             <ChevronDown className="w-5 h-5 text-[var(--text-secondary)]" />
           )}
         </div>
-        <div className="flex justify-between items-center text-lg mt-2 min-w-[300px] overflow-x-auto">
-          <div className="text-[var(--text-primary)] whitespace-nowrap">{game.away_team}</div>
-          <div className="text-[var(--text-primary)] mx-4 whitespace-nowrap">@</div>
-          <div className="text-[var(--text-primary)] whitespace-nowrap">{game.home_team}</div>
+        <div className="flex flex-col gap-2 mt-2">
+          <div className="flex items-center justify-between text-lg">
+            <div className="text-[var(--text-primary)] truncate max-w-[45%]">
+              {game.away_team}
+            </div>
+            <div className="text-[var(--text-primary)] mx-2">@</div>
+            <div className="text-[var(--text-primary)] truncate max-w-[45%]">
+              {game.home_team}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -306,11 +312,13 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
         <div className="p-4">
           <div className="min-w-[300px] overflow-x-auto">
             <div className="grid grid-cols-[140px,100px,100px] gap-x-3">
-              <div className="text-sm font-semibold text-[var(--text-secondary)] px-2 whitespace-nowrap">Bookmaker</div>
-              <div className="text-sm font-semibold text-[var(--text-secondary)] text-right whitespace-nowrap">
+              <div className="text-sm font-semibold text-[var(--text-secondary)] px-2 whitespace-nowrap">
+                Bookmaker
+              </div>
+              <div className="text-sm font-semibold text-[var(--text-secondary)] text-right whitespace-nowrap truncate">
                 {marketType === 'totals' ? 'Over' : game.away_team}
               </div>
-              <div className="text-sm font-semibold text-[var(--text-secondary)] text-right pl-4 whitespace-nowrap truncate">
+              <div className="text-sm font-semibold text-[var(--text-secondary)] text-right whitespace-nowrap truncate">
                 {marketType === 'totals' ? 'Under' : game.home_team}
               </div>
 
