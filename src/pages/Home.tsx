@@ -17,18 +17,12 @@ const Home: React.FC = () => {
 
         {/* Title Section */}
         <div className="space-y-6">
-          <h1 className="text-5xl font-bold text-[var(--text-primary)] tracking-tight">
-            Welcome to Hermes
+          <h1 className="text-4xl font-extrabold text-[var(--text-primary)] tracking-tight leading-tight">
+            Hermes
           </h1>
-        </div>
-
-        {/* Call to Action Section */}
-        <div className="pt-8">
-          <button
-            className="px-8 py-3 bg-[var(--button-primary)] text-white font-medium rounded-lg hover:bg-[var(--button-hover)] transition-colors duration-200"
-          >
-            Get Started
-          </button>
+          <p className="text-medium font-medium text-[var(--text-secondary)] tracking-wide">
+            Helping you beat the book
+          </p>
         </div>
       </div>
     </div>
