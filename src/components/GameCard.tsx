@@ -41,19 +41,169 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
     setIsExpanded(!isExpanded)
   }
 
-  const renderOutcome = (outcome: Outcome) => {
+  const findBestPrices = () => {
+    const market = game.bookmakers
+      .map(b => b.markets.find(m => m.key === marketType))
+      .filter(Boolean);
+
+    if (marketType === 'h2h') {  // moneyline
+      const awayPrices = market.map(m => m?.outcomes.find(o => o.name === game.away_team))
+        .filter(Boolean);
+      const homePrices = market.map(m => m?.outcomes.find(o => o.name === game.home_team))
+        .filter(Boolean);
+
+      const bestAway = awayPrices.reduce((best, current) => {
+        if (!best || !current) return best;
+        const isUnderdog = current.price > 0;
+        
+        if (isUnderdog) {
+          // For underdogs, want highest positive number
+          return current.price > best.price ? current : best;
+        } else {
+          // For favorites, want smallest negative number (closest to zero)
+          return Math.abs(current.price) < Math.abs(best.price) ? current : best;
+        }
+      });
+
+      const bestHome = homePrices.reduce((best, current) => {
+        if (!best || !current) return best;
+        const isUnderdog = current.price > 0;
+        
+        if (isUnderdog) {
+          // For underdogs, want highest positive number
+          return current.price > best.price ? current : best;
+        } else {
+          // For favorites, want smallest negative number (closest to zero)
+          return Math.abs(current.price) < Math.abs(best.price) ? current : best;
+        }
+      });
+
+      return { bestAway, bestHome };
+    }
+
     if (marketType === 'totals') {
-      return (
-        <div className="text-[var(--text-accent)] text-right">
-          {outcome.point && `${outcome.point} `}
-          {outcome.price > 0 ? `+${outcome.price}` : outcome.price}
-        </div>
-      )
+      const overPrices = market.map(m => m?.outcomes.find(o => o.name === 'Over'))
+        .filter(Boolean);
+      const underPrices = market.map(m => m?.outcomes.find(o => o.name === 'Under'))
+        .filter(Boolean);
+
+      const bestOver = overPrices.reduce((best, current) => {
+        if (!best || !current) return best;
+        if (current.point! < best.point!) return current;
+        if (current.point === best.point) {
+          return current.price > best.price ? current : best;
+        }
+        return best;
+      });
+
+      const bestUnder = underPrices.reduce((best, current) => {
+        if (!best || !current) return best;
+        if (current.point! > best.point!) return current;
+        if (current.point === best.point) {
+          return current.price > best.price ? current : best;
+        }
+        return best;
+      });
+
+      return { bestOver, bestUnder };
+    }
+
+    if (marketType === 'spreads') {
+      const awayPrices = market.map(m => m?.outcomes.find(o => o.name === game.away_team))
+        .filter(Boolean);
+      const homePrices = market.map(m => m?.outcomes.find(o => o.name === game.home_team))
+        .filter(Boolean);
+
+      const bestAway = awayPrices.reduce((best, current) => {
+        if (!best || !current) return best;
+        const isFavorite = current.point! < 0;
+        
+        if (isFavorite) {
+          if (Math.abs(current.point!) < Math.abs(best.point!)) return current;
+          if (Math.abs(current.point!) === Math.abs(best.point!)) {
+            return current.price > best.price ? current : best;
+          }
+        } else {
+          if (current.point! > best.point!) return current;
+          if (current.point === best.point) {
+            return current.price > best.price ? current : best;
+          }
+        }
+        return best;
+      });
+
+      const bestHome = homePrices.reduce((best, current) => {
+        if (!best || !current) return best;
+        const isFavorite = current.point! < 0;
+        
+        if (isFavorite) {
+          if (Math.abs(current.point!) < Math.abs(best.point!)) return current;
+          if (Math.abs(current.point!) === Math.abs(best.point!)) {
+            return current.price > best.price ? current : best;
+          }
+        } else {
+          if (current.point! > best.point!) return current;
+          if (current.point === best.point) {
+            return current.price > best.price ? current : best;
+          }
+        }
+        return best;
+      });
+
+      return { bestAway, bestHome };
+    }
+
+    const awayPrices = market.map(m => m?.outcomes.find(o => o.name === game.away_team))
+      .filter(Boolean);
+    const homePrices = market.map(m => m?.outcomes.find(o => o.name === game.home_team))
+      .filter(Boolean);
+
+    const bestAway = awayPrices.reduce((best, current) => {
+      if (!best || !current) return best;
+      const isUnderdog = current.price > 0;
+      return isUnderdog 
+        ? (current.price > best.price ? current : best)
+        : (current.price > best.price ? best : current);
+    });
+
+    const bestHome = homePrices.reduce((best, current) => {
+      if (!best || !current) return best;
+      const isUnderdog = current.price > 0;
+      return isUnderdog 
+        ? (current.price > best.price ? current : best)
+        : (current.price > best.price ? best : current);
+    });
+
+    return { bestAway, bestHome };
+  }
+
+  const renderOutcome = (outcome: Outcome, bookmakerKey: string) => {
+    const bestPrices = findBestPrices();
+    let isBestPrice = false;
+
+    if (marketType === 'totals') {
+      const { bestOver, bestUnder } = bestPrices;
+      isBestPrice = (
+        (outcome.name === 'Over' && outcome.point === bestOver?.point && outcome.price === bestOver?.price) ||
+        (outcome.name === 'Under' && outcome.point === bestUnder?.point && outcome.price === bestUnder?.price)
+      );
+    } else {
+      const { bestAway, bestHome } = bestPrices;
+      isBestPrice = (
+        (outcome.name === game.away_team && outcome.price === bestAway?.price && outcome.point === bestAway?.point) ||
+        (outcome.name === game.home_team && outcome.price === bestHome?.price && outcome.point === bestHome?.point)
+      );
     }
 
     return (
-      <div className="text-[var(--text-accent)] text-right">
-        {outcome.point !== undefined && `${outcome.point > 0 ? '+' : ''}${outcome.point} `}
+      <div className={`inline-block px-2 py-1 rounded ${
+        isBestPrice 
+          ? 'text-green-500 bg-green-500/10' 
+          : 'text-[var(--text-accent)]'
+      }`}>
+        {marketType === 'totals' || marketType === 'spreads' 
+          ? `${outcome.point && `${outcome.point > 0 ? '' : ''}${outcome.point} `}`
+          : ''}
         {outcome.price > 0 ? `+${outcome.price}` : outcome.price}
       </div>
     )
@@ -69,11 +219,15 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
       
       return (
         <React.Fragment key={bookmaker.key}>
-          <div className="text-sm text-[var(--text-primary)]">
+          <div className="text-sm text-[var(--text-primary)] px-2">
             {bookmaker.title}
           </div>
-          {overOutcome && renderOutcome(overOutcome)}
-          {underOutcome && renderOutcome(underOutcome)}
+          <div className="flex justify-end">
+            {overOutcome && renderOutcome(overOutcome, bookmaker.key)}
+          </div>
+          <div className="flex justify-end">
+            {underOutcome && renderOutcome(underOutcome, bookmaker.key)}
+          </div>
         </React.Fragment>
       )
     }
@@ -83,11 +237,15 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
 
     return (
       <React.Fragment key={bookmaker.key}>
-        <div className="text-sm text-[var(--text-primary)]">
+        <div className="text-sm text-[var(--text-primary)] px-2">
           {bookmaker.title}
         </div>
-        {awayOutcome && renderOutcome(awayOutcome)}
-        {homeOutcome && renderOutcome(homeOutcome)}
+        <div className="flex justify-end">
+          {awayOutcome && renderOutcome(awayOutcome, bookmaker.key)}
+        </div>
+        <div className="flex justify-end">
+          {homeOutcome && renderOutcome(homeOutcome, bookmaker.key)}
+        </div>
       </React.Fragment>
     )
   }
@@ -123,17 +281,15 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType }) => {
         style={{ maxHeight: isExpanded ? '800px' : '0' }}
       >
         <div className="p-4">
-          <div className="grid grid-cols-[auto,1fr,1fr] gap-4">
-            {/* Headers */}
-            <div className="text-sm font-semibold text-[var(--text-secondary)]">Bookmaker</div>
-            <div className="text-sm font-semibold text-[var(--text-secondary)] text-right">
+          <div className="grid grid-cols-[1fr,auto,auto] gap-x-4">
+            <div className="text-sm font-semibold text-[var(--text-secondary)] px-2">Bookmaker</div>
+            <div className="text-sm font-semibold text-[var(--text-secondary)] flex justify-end">
               {marketType === 'totals' ? 'Over' : game.away_team}
             </div>
-            <div className="text-sm font-semibold text-[var(--text-secondary)] text-right">
+            <div className="text-sm font-semibold text-[var(--text-secondary)] flex justify-end">
               {marketType === 'totals' ? 'Under' : game.home_team}
             </div>
 
-            {/* Bookmaker rows */}
             {game.bookmakers.map((bookmaker) => getMarketOutcomes(bookmaker))}
           </div>
         </div>
