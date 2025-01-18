@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import GameCard from '@components/GameCard'
-import { oddsService } from '@services/oddsService'
+import React, { useState, useEffect } from 'react';
+import GameScheduleCard from '@components/GameScheduleCard';
+import { oddsService } from '@services/oddsService';
+import { NHL } from '@constants/teamAbbreviations';
 
 interface Game {
   id: string;
@@ -12,35 +13,46 @@ interface Game {
   bookmakers: any[];
 }
 
-type MarketType = 'h2h' | 'spreads' | 'totals'
+type MarketType = 'h2h' | 'spreads' | 'totals';
 
-
-const NHL: React.FC = () => {
-  const [games, setGames] = useState<Game[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [selectedMarket, setSelectedMarket] = useState<MarketType>('spreads')
+const NHLPage: React.FC = () => {
+  const [games, setGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMarket, setSelectedMarket] = useState<MarketType>('spreads');
 
   useEffect(() => {
     const loadGames = async () => {
       try {
-        setLoading(true)
-        const data = await oddsService.getLatestOdds('icehockey_nhl')
-        console.log('Loaded games:', data)
-        setGames(data as Game[])
+        setLoading(true);
+        const data = await oddsService.getLatestOdds('icehockey_nhl');
+        // Transform the data to use abbreviations
+        const gamesWithAbbreviations = data.map((game: Game) => {
+          // Find the abbreviation by matching the full team name
+          const homeAbbr = Object.entries(NHL).find(([_, name]) => name === game.home_team)?.[0] || game.home_team;
+          const awayAbbr = Object.entries(NHL).find(([_, name]) => name === game.away_team)?.[0] || game.away_team;
+          
+          return {
+            ...game,
+            home_team: homeAbbr,
+            away_team: awayAbbr
+          };
+        });
+        console.log('Loaded games:', gamesWithAbbreviations);
+        setGames(gamesWithAbbreviations as Game[]);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadGames()
-  }, [])
+    loadGames();
+  }, []);
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
-  if (!games.length) return <div>No games available</div>
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!games.length) return <div>No games available</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -62,7 +74,7 @@ const NHL: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 [&>*]:break-inside-avoid">
         {games.map((game) => (
           <div key={game.id} className="inline-block w-full">
-            <GameCard 
+            <GameScheduleCard 
               game={game} 
               marketType={selectedMarket}
             />
@@ -70,7 +82,7 @@ const NHL: React.FC = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default NHL 
+export default NHLPage;

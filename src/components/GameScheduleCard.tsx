@@ -2,6 +2,7 @@
 import React from 'react';
 import '../index.css';
 import { teamAbbreviations } from '@constants/teamAbbreviations';
+import { useNavigate } from 'react-router-dom';
 
 interface GameScheduleCardProps {
   game: {
@@ -16,6 +17,7 @@ interface GameScheduleCardProps {
 
 const GameScheduleCard: React.FC<GameScheduleCardProps> = ({ game, marketType }) => {
   const { home_team, away_team, commence_time, bookmakers } = game;
+  const navigate = useNavigate();
 
   // Format date/time
   const formatDateTime = (dateString: string) => {
@@ -62,6 +64,11 @@ const GameScheduleCard: React.FC<GameScheduleCardProps> = ({ game, marketType })
     }
   };
 
+  const handleOddsClick = (teamPosition: 'home' | 'away') => {
+    // We'll implement the navigation/details logic later
+    navigate(`/game/${game.id}/${teamPosition}`);
+  };
+
   return (
     <div className="bg-[var(--bg-secondary)] rounded-lg p-4 shadow-lg">
       {/* Date/Time centered at top */}
@@ -76,9 +83,14 @@ const GameScheduleCard: React.FC<GameScheduleCardProps> = ({ game, marketType })
           <div className="text-xl font-bold mb-2 text-[var(--text-primary)]">
             {away_team}
           </div>
-          <div className="text-lg text-[var(--text-primary)]">
+          <button
+            onClick={() => handleOddsClick('away')}
+            className="px-4 py-2 border-2 border-[var(--border-color)] rounded-lg 
+                     hover:border-[var(--text-accent)] transition-colors duration-200
+                     text-lg text-[var(--text-primary)] min-w-[80px] text-center"
+          >
             {getPrice('away')}
-          </div>
+          </button>
         </div>
 
         {/* Home Team Column */}
@@ -86,9 +98,14 @@ const GameScheduleCard: React.FC<GameScheduleCardProps> = ({ game, marketType })
           <div className="text-xl font-bold mb-2 text-[var(--text-primary)]">
             {home_team}
           </div>
-          <div className="text-lg text-[var(--text-primary)]">
+          <button
+            onClick={() => handleOddsClick('home')}
+            className="px-4 py-2 border-2 border-[var(--border-color)] rounded-lg 
+                     hover:border-[var(--text-accent)] transition-colors duration-200
+                     text-lg text-[var(--text-primary)] min-w-[80px] text-center"
+          >
             {getPrice('home')}
-          </div>
+          </button>
         </div>
       </div>
     </div>
