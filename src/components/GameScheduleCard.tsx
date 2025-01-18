@@ -1,8 +1,13 @@
 // src/components/GameScheduleCard.tsx
 import React from 'react';
 import '../index.css';
-import { teamAbbreviations } from '@constants/teamAbbreviations';
+import { NBA, NFL, NHL, NCAAF } from '@constants/teamAbbreviations';
 import { useNavigate } from 'react-router-dom';
+
+// Type for team mappings
+type TeamMappings = {
+  [key: string]: string;
+};
 
 interface GameScheduleCardProps {
   game: {
@@ -11,13 +16,30 @@ interface GameScheduleCardProps {
     away_team: string;
     commence_time: string;
     bookmakers: any[];
+    sport_key: string;
   };
   marketType: 'h2h' | 'spreads' | 'totals';
 }
 
 const GameScheduleCard: React.FC<GameScheduleCardProps> = ({ game, marketType }) => {
-  const { home_team, away_team, commence_time, bookmakers } = game;
+  const { home_team, away_team, commence_time, bookmakers, sport_key } = game;
   const navigate = useNavigate();
+
+  // Helper function to get the correct abbreviation mapping based on sport
+  const getTeamMapping = (): TeamMappings => {
+    switch (sport_key) {
+      case 'basketball_nba':
+        return NBA as TeamMappings;
+      case 'americanfootball_nfl':
+        return NFL;
+      case 'icehockey_nhl':
+        return NHL as TeamMappings;
+      case 'americanfootball_ncaaf':
+        return NCAAF as TeamMappings;
+      default:
+        return {};
+    }
+  };
 
   // Format date/time
   const formatDateTime = (dateString: string) => {
@@ -42,13 +64,30 @@ const GameScheduleCard: React.FC<GameScheduleCardProps> = ({ game, marketType })
 
   // Helper function to get the price based on position and market type
   const getPrice = (position: 'home' | 'away') => {
+    const teamMapping = getTeamMapping();
+    
     const outcome = marketType === 'totals'
       ? outcomes.find((o: any) => o.name === (position === 'home' ? 'Over' : 'Under'))
-      : outcomes.find((o: any) => 
-          position === 'home' 
-            ? teamAbbreviations[o.name] === game.home_team 
-            : teamAbbreviations[o.name] === game.away_team
-        );
+      : outcomes.find((o: any) => {
+          if (!o.name) return false;
+
+          // Special handling for NFL since its mapping is reversed
+          if (sport_key === 'americanfootball_nfl') {
+            // For NFL, o.name is the full team name, and we need to look up its abbreviation
+            const teamAbbr = teamMapping[o.name];
+            return position === 'home' 
+              ? teamAbbr === game.home_team 
+              : teamAbbr === game.away_team;
+          } else {
+            // For other sports, we look up the full name and check if it's in the outcome name
+            const outcomeTeamAbbr = Object.entries(teamMapping)
+              .find(([_, name]) => o.name.includes(name))?.[0];
+            
+            return position === 'home' 
+              ? outcomeTeamAbbr === game.home_team 
+              : outcomeTeamAbbr === game.away_team;
+          }
+      });
 
     if (!outcome) return '-';
 
@@ -56,9 +95,9 @@ const GameScheduleCard: React.FC<GameScheduleCardProps> = ({ game, marketType })
       case 'spreads':
         return outcome.point || '-';
       case 'totals':
-        return `${outcome.name} ${outcome.point}`; // Shows "Over X.X" or "Under X.X"
+        return `${outcome.name} ${outcome.point}`;
       case 'h2h':
-        return outcome.price || '-'; // Shows moneyline odds
+        return outcome.price || '-';
       default:
         return '-';
     }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import GameScheduleCard from '@components/GameScheduleCard';
 import { oddsService } from '@services/oddsService';
-import { teamAbbreviations } from '@constants/teamAbbreviations';
+import { NFL } from '@constants/teamAbbreviations';
 
 interface Game {
   id: string;
@@ -16,7 +16,7 @@ interface Game {
 
 type MarketType = 'h2h' | 'spreads' | 'totals';
 
-const NFL: React.FC = () => {
+const NFLPage: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,10 +30,9 @@ const NFL: React.FC = () => {
         // Transform the data to use abbreviations
         const gamesWithAbbreviations = data.map((game: Game) => ({
           ...game,
-          home_team: teamAbbreviations[game.home_team] || game.home_team,
-          away_team: teamAbbreviations[game.away_team] || game.away_team
+          home_team: NFL[game.home_team] || game.home_team,
+          away_team: NFL[game.away_team] || game.away_team
         }));
-        console.log('Loaded games:', gamesWithAbbreviations);
         setGames(gamesWithAbbreviations as Game[]);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -80,4 +79,4 @@ const NFL: React.FC = () => {
   );
 };
 
-export default NFL;
+export default NFLPage;
