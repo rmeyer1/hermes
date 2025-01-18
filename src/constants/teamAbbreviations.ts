@@ -1,4 +1,4 @@
-export const teamAbbreviations: { [key: string]: string } = {
+export const NFL: { [key: string]: string } = {
   'New England Patriots': 'NE',
   'New York Jets': 'NYJ',
   'Buffalo Bills': 'BUF',
