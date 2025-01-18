@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import GameCard from '@components/GameCard'
+import GameScheduleCard from '@components/GameScheduleCard'
 import { oddsService } from '@services/oddsService'
+import { NCAAF } from '@constants/teamAbbreviations'
 
 interface Game {
   id: string;
@@ -26,8 +27,27 @@ const NCAAFB: React.FC = () => {
       try {
         setLoading(true)
         const data = await oddsService.getLatestOdds('americanfootball_ncaaf')
-        console.log('Loaded games:', data)
-        setGames(data as Game[])
+        
+        const gamesWithAbbreviations = data.map((game: Game) => {
+          // Helper function to find abbreviation by matching API team name
+          const findTeamAbbr = (apiTeamName: string) => {
+            // Find the entry where the API team name includes our full team name
+            const entry = Object.entries(NCAAF).find(([abbr, fullName]) => {
+              return apiTeamName.toLowerCase().includes(fullName.toLowerCase());
+            });
+            
+            return entry?.[0] || apiTeamName;
+          };
+
+          return {
+            ...game,
+            home_team: findTeamAbbr(game.home_team),
+            away_team: findTeamAbbr(game.away_team)
+          };
+        });
+        
+        console.log('Loaded games:', gamesWithAbbreviations);
+        setGames(gamesWithAbbreviations as Game[]);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
@@ -61,7 +81,7 @@ const NCAAFB: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 [&>*]:break-inside-avoid">
         {games.map((game) => (
           <div key={game.id} className="inline-block w-full">
-            <GameCard 
+            <GameScheduleCard 
               game={game} 
               marketType={selectedMarket}
             />

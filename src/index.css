@@ -62,3 +62,34 @@ body {
 .chart-area {
   fill: rgba(54, 153, 255, 0.1);
 }
+.game-schedule-card {
+  background-color: var(--bg-secondary); /* Dark background */
+  color: #f5f5f5; /* Light text */
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.game-schedule-card .team-name {
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.game-schedule-card .details {
+  font-size: 0.875rem;
+  color: #b0b0b0; /* Slightly lighter text for details */
+}
+
+.game-schedule-card .odds {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.game-schedule-card .odds-item {
+  text-align: center;
+  padding: 8px;
+  background-color: #2a2a2a;
+  border-radius: 4px;
+}
