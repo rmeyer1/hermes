@@ -6,6 +6,7 @@ import NFL from '@pages/NFL'
 import NBA from '@pages/NBA'
 import NCAAFB from '@pages/NCAAFB'
 import NHL from '@pages/NHL'
+import GameDetails from '@pages/GameDetails'
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="ncaafb" element={<NCAAFB />} />
         <Route path="nba" element={<NBA />} />
         <Route path="nhl" element={<NHL />} />
+        <Route path="/game/:gameId/:teamPosition" element={<GameDetails />} />
       </Route>
     </Routes>
   )
