@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import '../index.css'
-import { ChevronDown, ChevronUp, ArrowUp, ArrowDown } from 'lucide-react'
+import {  ArrowUp, ArrowDown } from 'lucide-react'
 import { cleanSportsUrl } from '@utils/formatUrl'
 
 interface Outcome {
@@ -31,10 +31,6 @@ interface Game {
   previousOdds?: Bookmaker[]
 }
 
-interface GameWithHistory extends Game {
-  previousOdds: Bookmaker[];
-}
-
 interface GameCardProps {
   game: Game
   marketType: 'h2h' | 'spreads' | 'totals'
@@ -43,14 +39,6 @@ interface GameCardProps {
 
 const GameCard: React.FC<GameCardProps> = ({ game, marketType, teamPosition }) => {
   const teamName = teamPosition === 'home' ? game.home_team : game.away_team;
-
-  console.log('[GameCard] Rendering with:', {
-    teamName,
-    marketType,
-    bookmakers: game.bookmakers?.length,
-    hasPreviousOdds: !!game.previousOdds,
-    previousOddsCount: game.previousOdds?.length
-  });
 
   // Find best price for the selected team
   const findBestPrice = () => {
@@ -117,19 +105,16 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType, teamPosition }) =
 
   const getPriceMovement = (outcome: Outcome, bookmaker: Bookmaker) => {
     if (!game.previousOdds?.length) {
-      console.log('[GameCard] No historical odds available for:', bookmaker.key);
       return null;
     }
 
     const previousBookmaker = game.previousOdds.find(b => b.key === bookmaker.key);
     if (!previousBookmaker?.markets) {
-      console.log('[GameCard] No previous markets for bookmaker:', bookmaker.key);
       return null;
     }
 
     const previousMarket = previousBookmaker.markets.find(m => m.key === marketType);
     if (!previousMarket?.outcomes) {
-      console.log('[GameCard] No previous outcomes for market type:', marketType);
       return null;
     }
 
@@ -139,12 +124,6 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType, teamPosition }) =
         o.name === (teamPosition === 'home' ? 'Over' : 'Under')
       );
     } else {
-      console.log('[GameCard] Looking for previous outcome:', {
-        currentTeam: outcome.name,
-        currentPoint: outcome.point,
-        availableOutcomes: previousMarket.outcomes
-      });
-
         // For moneyline (h2h), and spreads just match the team name
         previousOutcome = previousMarket.outcomes.find(o => {
         return o.name === outcome.name;
@@ -152,24 +131,12 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType, teamPosition }) =
     }
 
     if (!previousOutcome) {
-      console.log('[GameCard] No matching previous outcome found for:', {
-        team: outcome.name,
-        point: outcome.point,
-        market: marketType
-      });
       return null;
     }
 
     // For American odds, a higher negative number is worse odds
     const currentPrice = Number(outcome.price);
     const previousPrice = Number(previousOutcome.price);
-
-    console.log('[GameCard] Found price movement:', {
-      bookmaker: bookmaker.key,
-      team: outcome.name,
-      current: currentPrice,
-      previous: previousPrice
-    });
 
     if (currentPrice > previousPrice) {
       return <ArrowUp className="w-4 h-4 text-green-500" />;
@@ -189,20 +156,31 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType, teamPosition }) =
     );
 
     const priceMovement = getPriceMovement(outcome, bookmaker);
+    const cleanUrl = outcome.link ? cleanSportsUrl(outcome.link) : null;
     
-    const content = marketType === 'spreads' 
-      ? `${outcome.point > 0 ? '+' : ''}${outcome.point} ${outcome.price > 0 ? '+' : ''}${outcome.price}`
-      : outcome.point 
-        ? `${outcome.point} ${outcome.price > 0 ? '+' : ''}${outcome.price}` 
-        : `${outcome.price > 0 ? '+' : ''}${outcome.price}`;
-
     const className = `text-[var(--text-primary)] ${isBestPrice ? 'font-bold text-green-500' : ''}`;
 
     return (
       <div className={className}>
-        <div className="flex items-center gap-2">
-          {content}
-          {priceMovement}
+        <div className="flex items-center justify-end">
+          <div className="grid grid-cols-2 gap-4">
+            {(marketType === 'spreads' || outcome.point) && (
+              <span className="w-16 text-right">
+                {cleanUrl ? (
+                  <button 
+                    onClick={() => window.open(cleanUrl, '_blank')}
+                    className="hover:text-[var(--text-accent)] transition-colors"
+                  >
+                    {outcome.point > 0 ? '+' : ''}{outcome.point}
+                  </button>
+                ) : (
+                  <span>{outcome.point > 0 ? '+' : ''}{outcome.point}</span>
+                )}
+              </span>
+            )}
+            <span className="w-16 text-right">{outcome.price > 0 ? '+' : ''}{outcome.price}</span>
+          </div>
+          <div className="ml-2">{priceMovement}</div>
         </div>
       </div>
     );

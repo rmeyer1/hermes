@@ -32,16 +32,8 @@ const GameDetails: React.FC = () => {
         if (!gameId) return;
         
         const gameData = await oddsService.getGameById(gameId);
-        console.log('[GameDetails] Raw game data:', {
-          id: gameData?.id,
-          hasBookmakers: !!gameData?.bookmakers,
-          bookmakersLength: gameData?.bookmakers?.length,
-          hasPreviousOdds: !!gameData?.previousOdds,
-          previousOddsLength: gameData?.previousOdds?.length
-        });
 
         if (!gameData?.bookmakers) {
-          console.log('[GameDetails] No bookmakers data available');
           setGame(null);
           return;
         }
@@ -76,29 +68,31 @@ const GameDetails: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <button 
-          onClick={() => navigate(-1)}
-          className="text-[var(--text-primary)] hover:text-[var(--text-accent)]"
-        >
-          ← Back
-        </button>
-        <select
-          value={selectedMarket}
-          onChange={(e) => setSelectedMarket(e.target.value as 'h2h' | 'spreads' | 'totals')}
-          className="bg-[var(--bg-secondary)] text-[var(--text-primary)] px-4 py-2 rounded cursor-pointer border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--text-accent)] focus:border-transparent"
-        >
-          <option value="spreads">Spread</option>
-          <option value="h2h">Moneyline</option>
-          <option value="totals">Totals</option>
-        </select>
-      </div>
+      <div className="max-w-2xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <button 
+            onClick={() => navigate(-1)}
+            className="text-[var(--text-primary)] hover:text-[var(--text-accent)]"
+          >
+            ← Back
+          </button>
+          <select
+            value={selectedMarket}
+            onChange={(e) => setSelectedMarket(e.target.value as 'h2h' | 'spreads' | 'totals')}
+            className="bg-[var(--bg-secondary)] text-[var(--text-primary)] px-4 py-2 rounded cursor-pointer border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--text-accent)] focus:border-transparent"
+          >
+            <option value="spreads">Spread</option>
+            <option value="h2h">Moneyline</option>
+            <option value="totals">Totals</option>
+          </select>
+        </div>
 
-      <GameCard 
-        game={game}
-        marketType={selectedMarket}
-        teamPosition={teamPosition as 'home' | 'away'}
-      />
+        <GameCard 
+          game={game}
+          marketType={selectedMarket}
+          teamPosition={teamPosition as 'home' | 'away'}
+        />
+      </div>
     </div>
   );
 };
