@@ -171,10 +171,10 @@ const GameCard: React.FC<GameCardProps> = ({ game, marketType, teamPosition }) =
                     onClick={() => window.open(cleanUrl, '_blank')}
                     className="hover:text-[var(--text-accent)] transition-colors"
                   >
-                    {outcome.point > 0 ? '+' : ''}{outcome.point}
+                    {typeof outcome.point === 'number' && (outcome.point > 0 ? '+' : '')}{outcome.point}
                   </button>
                 ) : (
-                  <span>{outcome.point > 0 ? '+' : ''}{outcome.point}</span>
+                  <span>{typeof outcome.point === 'number' && (outcome.point > 0 ? '+' : '')}{outcome.point}</span>
                 )}
               </span>
             )}
