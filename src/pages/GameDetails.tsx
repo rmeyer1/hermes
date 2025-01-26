@@ -21,10 +21,10 @@ interface Game {
   previousOdds: Bookmaker[];
 }
 interface ChartData {
-    labels: string[] | undefined;
+    labels: string[];
     datasets: {
       label: string;
-      data: number[] | undefined;
+      data: number[];
       borderColor: string;
       backgroundColor: string;
     }[];
@@ -85,7 +85,7 @@ const chartData: ChartData = {
       const year = date.getFullYear();
   
       return `${month}/${day}/${year}`;
-    }),
+    }) || [],
     datasets: [
       {
         label: teamPosition === 'home' ? game?.home_team || 'Home Team' : game?.away_team || 'Away Team',
@@ -107,7 +107,7 @@ const chartData: ChartData = {
           );
   
           return selectedMarket === 'h2h' ? outcome?.price : outcome?.point || 0;
-        }).filter(Boolean), // Remove null values
+        }).filter(Boolean) || [], // Remove null values
         borderColor: 'rgba(75, 192, 192, 1)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
       },
