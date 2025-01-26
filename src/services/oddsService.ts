@@ -29,6 +29,27 @@ export const oddsService = {
       throw error;
     }
   },
+  async getHistoricalOdds(gameId: string): Promise<any> {
+    try {
+      const oddsCollection = collection(db, 'odds');
+      const q = query(
+        oddsCollection,
+        orderBy('timestamp', 'desc'), // Order by timestamp
+      );
+
+      const querySnapshot = await getDocs(q);
+      const historicalData = querySnapshot.docs
+        .map((doc) => doc.data())
+        .flatMap((doc) => doc.data) // Flatten the `data` array
+        .filter((game) => game.id === gameId); // Filter by `gameId`
+
+      console.log('Historical Data:', historicalData); // Debugging
+      return historicalData;
+    } catch (error) {
+      console.error('[oddsService] Error fetching historical odds:', error);
+      throw error;
+    }
+  },
   async getGameById(gameId: string): Promise<any> {
     try {
       // First, find the specific game to get its sport
